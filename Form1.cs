@@ -9,7 +9,6 @@ public struct Complex
         Re = re;
         Im = im;
     }
-
     public double Magnitude => Math.Sqrt(Re * Re + Im * Im);
 
     public static Complex operator +(Complex a, Complex b) => new Complex(a.Re + b.Re, a.Im + b.Im);
