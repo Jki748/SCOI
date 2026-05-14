@@ -27,7 +27,6 @@ namespace laboratornaja1
         private Complex[,] currentSpectrum = null;
         private int currentWidth = 0;
         private int currentHeight = 0;
-
         private string imagePath1;
         private string imagePath2;
         private OpenFileDialog openFileDialog;
