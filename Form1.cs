@@ -199,33 +199,56 @@ namespace laboratornaja1
             double[,] data = new double[h, w];
             Array.Copy(image, data, image.Length);
 
-            CenterImage(data);
-
-            Complex[,] temp = new Complex[h, w];
-
             for (int y = 0; y < h; y++)
             {
-                double[] row = new double[w];
                 for (int x = 0; x < w; x++)
-                    row[x] = data[y, x];
+                {
+                    if ((x + y) % 2 == 1)
+                        data[y, x] = -data[y, x];
+                }
+            }
 
-                Complex[] dftRow = DFT1D(row, false);
+            Complex[,] temp = new Complex[h, w];
+            for (int y = 0; y < h; y++)
+            {
+                Complex[] row = new Complex[w];
+                for (int x = 0; x < w; x++)
+                    row[x] = new Complex(data[y, x], 0);
+
+                Complex[] dftRow = DFT1DComplex(row);
                 for (int x = 0; x < w; x++)
                     temp[y, x] = dftRow[x];
             }
-
             Complex[,] result = new Complex[h, w];
             for (int x = 0; x < w; x++)
             {
-                double[] realCol = new double[h];
+                Complex[] col = new Complex[h];
                 for (int y = 0; y < h; y++)
-                    realCol[y] = temp[y, x].Re;
+                    col[y] = temp[y, x];
 
-                Complex[] dftCol = DFT1D(realCol, false);
+                Complex[] dftCol = DFT1DComplex(col);
                 for (int y = 0; y < h; y++)
                     result[y, x] = dftCol[y];
             }
 
+            return result;
+        }
+        private Complex[] DFT1DComplex(Complex[] signal)
+        {
+            int N = signal.Length;
+            Complex[] result = new Complex[N];
+
+            for (int u = 0; u < N; u++)
+            {
+                Complex sum = new Complex(0, 0);
+                for (int k = 0; k < N; k++)
+                {
+                    double angle = -2.0 * Math.PI * u * k / N;
+                    Complex exp = Complex.Exp(angle);
+                    sum += signal[k] * exp;
+                }
+                result[u] = new Complex(sum.Re / N, sum.Im / N);
+            }
             return result;
         }
         private double[,] InverseDFT2D(Complex[,] spectrum)
@@ -237,11 +260,11 @@ namespace laboratornaja1
 
             for (int y = 0; y < h; y++)
             {
-                double[] realRow = new double[w];
+                Complex[] row = new Complex[w];
                 for (int x = 0; x < w; x++)
-                    realRow[x] = spectrum[y, x].Re;
+                    row[x] = spectrum[y, x];
 
-                Complex[] idftRow = DFT1D(realRow, true);
+                Complex[] idftRow = InverseDFT1DComplex(row);
                 for (int x = 0; x < w; x++)
                     temp[y, x] = idftRow[x];
             }
@@ -249,12 +272,12 @@ namespace laboratornaja1
             Complex[,] resultComplex = new Complex[h, w];
             for (int x = 0; x < w; x++)
             {
-                double[] realCol = new double[h];
+                Complex[] col = new Complex[h];
                 for (int y = 0; y < h; y++)
-                    realCol[y] = temp[y, x].Re;
+                    col[y] = temp[y, x];
 
-                Complex[] idftCol = DFT1D(realCol, true);
-                for (int y = 0; y < h; y++)
+                Complex[] idftCol = InverseDFT1DComplex(col);
+                for (int y = 0; y < w; y++)
                     resultComplex[y, x] = idftCol[y];
             }
 
@@ -264,11 +287,36 @@ namespace laboratornaja1
                 for (int x = 0; x < w; x++)
                 {
                     result[y, x] = resultComplex[y, x].Re;
+                }
+            }
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
                     if ((x + y) % 2 == 1)
                         result[y, x] = -result[y, x];
                 }
             }
 
+            return result;
+        }
+        private Complex[] InverseDFT1DComplex(Complex[] signal)
+        {
+            int N = signal.Length;
+            Complex[] result = new Complex[N];
+
+            for (int u = 0; u < N; u++)
+            {
+                Complex sum = new Complex(0, 0);
+                for (int k = 0; k < N; k++)
+                {
+                    double angle = 2.0 * Math.PI * u * k / N;
+                    Complex exp = Complex.Exp(angle);
+                    sum += signal[k] * exp;
+                }
+                result[u] = new Complex(sum.Re / N, sum.Im / N);
+            }
             return result;
         }
         private Bitmap VisualizeSpectrum(Complex[,] spectrum)
