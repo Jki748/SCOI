@@ -23,7 +23,6 @@ namespace laboratornaja1
 {
     public partial class Form1 : Form
     {
-        // Хранение спектра между операциями
         private Complex[,] currentSpectrum = null;
         private int currentWidth = 0;
         private int currentHeight = 0;
